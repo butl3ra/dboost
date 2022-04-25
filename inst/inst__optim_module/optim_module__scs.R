@@ -1,5 +1,4 @@
 # --- optim_scs oracle:
-if(F){
 optim_scs = optim_module(
   classname = "OptimSCS",
   # --- init
@@ -87,5 +86,5 @@ optim_scs = optim_module(
 
   }
 )
-}
+
 

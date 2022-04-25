@@ -1,5 +1,4 @@
-# --- optim_scs oracle:
-if(F){
+# --- optim_qp oracle:
   optim_qp = optim_module(
     classname = "OptimQP",
     # --- init
@@ -71,5 +70,4 @@ if(F){
 
     }
   )
-}
 
