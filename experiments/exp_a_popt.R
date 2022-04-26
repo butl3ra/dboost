@@ -5,7 +5,7 @@ dir_out = '~/Dropbox (Personal)/workspace_phd/papers/paper_8_dboost/experiment_p
 dir.create(dir_out,recursive = T)
 file_names_0 = c('in_sample_cost','out_of_sample_cost','in_sample_opt_cum_cost','out_of_sample_opt_cum_cost')
 file_names_0 = paste0(dir_out,file_names_0)
-# --- poly degree 3 and poly degree 9
+load_dboost_modules()
 # --- noise_multiplier 1, 10
 noise_multiplier_taus = c(0,0.5,1)
 
@@ -107,19 +107,6 @@ spot_forest_args = lapply(max_depth,function(md){
        verbose = verbose)
 })
 
-boost_args = list(model_method = 'dtree_fit',
-                  model_args = list(max_depth = 0,
-                                    min_obs = min_obs,
-                                    step_size = step_size,
-                                    objective_method = 'objective_dtree_pve'),
-                  objective_method = 'objective_mse',
-                  grad_method = 'grad_mse',
-                  do_grad_project = TRUE,
-                  maximize = NULL,
-                  verbose = verbose,
-                  max_iter = n_samples,
-                  weight_tol = weight_tol,
-                  objective_tol = objective_tol)
 
 boost_args = lapply(max_depth,function(md){
   list(model_method = 'dtree_fit',
@@ -137,19 +124,6 @@ boost_args = lapply(max_depth,function(md){
        objective_tol = objective_tol)
 })
 
-dboost_args = list(model_method = 'dtree_fit',
-                   model_args = list(max_depth = 0,
-                                     min_obs = min_obs,
-                                     step_size = step_size,
-                                     objective_method = 'objective_dtree_spo'),
-                   objective_method = 'objective_spo',
-                   grad_method = 'grad_spo',
-                   do_grad_project = TRUE,
-                   maximize = NULL,
-                   verbose = verbose,
-                   max_iter = n_samples,
-                   weight_tol = weight_tol,
-                   objective_tol = objective_tol)
 
 dboost_args = lapply(max_depth,function(md){
   list(model_method = 'dtree_fit',
@@ -167,21 +141,6 @@ dboost_args = lapply(max_depth,function(md){
        objective_tol = objective_tol)
 })
 
-#boost_args = lapply(max_depth,function(md){
-#  list(model_method = 'dtree_fit',
-#       model_args = list(max_depth = md,
-#                         min_obs = min_obs,
-#                         step_size = step_size,
-#                         objective_method = 'objective_dtree_pve'),
-#       objective_method = 'objective_mse',
-#       grad_method = 'grad_mse',
-#       do_grad_project = TRUE,
-#       maximize = NULL,
-#       verbose = verbose,
-#       max_iter = n_samples,
-#       weight_tol = weight_tol,
-#       objective_tol = objective_tol)
-#})
 
 model_args = c(cart_args,rf_args,spot_args,spot_forest_args,
                boost_args,dboost_args)
@@ -201,7 +160,6 @@ for(tau in noise_multiplier_taus){
   in_sample_opt_cum_loss = out_of_sample_opt_cum_loss = matrix(NA,n_sims,n_models,dimnames = list(NULL,model_names))
 
 
-  #mean(rowSums(costs*z_hat_db)[-1]) + 0.05*mean(rowSums(abs(diff(z_hat_db))))
   # --- main loop:
   for(i in 1:n_sims){
 

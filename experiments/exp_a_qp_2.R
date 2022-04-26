@@ -1,11 +1,10 @@
 # ------------------------------------------------------
 # Generate lp network flow problems:
 # ------------------------------------------------------
-dir_out = '~/Dropbox (Personal)/workspace_phd/papers/paper_8_dboost/experiment_qp/'
+dir_out = '~/Dropbox (Personal)/workspace_phd/papers/paper_8_dboost/experiment_qp_2/'
 dir.create(dir_out,recursive = T)
 file_names_0 = c('in_sample_cost','out_of_sample_cost','in_sample_opt_cum_cost','out_of_sample_opt_cum_cost')
 file_names_0 = paste0(dir_out,file_names_0)
-
 load_dboost_modules()
 # --- noise_multiplier 1, 10
 noise_multiplier_taus = c(0,0.50,1)
@@ -14,7 +13,7 @@ noise_multiplier_taus = c(0,0.50,1)
 n_obs = 1000
 n_x = 5
 pct_true = 0.5
-poly_degree = 1:3
+poly_degree = c(6,7,9)
 intercept = F
 intercept_mean = 0.0
 # --- popt
@@ -105,7 +104,19 @@ spot_forest_args = lapply(max_depth,function(md){
        verbose = verbose)
 })
 
-
+boost_args = list(model_method = 'dtree_fit',
+                  model_args = list(max_depth = 0,
+                                    min_obs = min_obs,
+                                    step_size = step_size,
+                                    objective_method = 'objective_dtree_pve'),
+                  objective_method = 'objective_mse',
+                  grad_method = 'grad_mse',
+                  do_grad_project = TRUE,
+                  maximize = NULL,
+                  verbose = verbose,
+                  max_iter = n_samples,
+                  weight_tol = weight_tol,
+                  objective_tol = objective_tol)
 
 boost_args = lapply(max_depth,function(md){
   list(model_method = 'dtree_fit',
@@ -123,7 +134,19 @@ boost_args = lapply(max_depth,function(md){
        objective_tol = objective_tol)
 })
 
-
+dboost_args = list(model_method = 'dtree_fit',
+                   model_args = list(max_depth = 0,
+                                     min_obs = min_obs,
+                                     step_size = step_size,
+                                     objective_method = 'objective_dtree_qspo'),
+                   objective_method = 'objective_qspo',
+                   grad_method = 'grad_qspo',
+                   do_grad_project = TRUE,
+                   maximize = NULL,
+                   verbose = verbose,
+                   max_iter = n_samples,
+                   weight_tol = weight_tol,
+                   objective_tol = objective_tol)
 
 dboost_args = lapply(max_depth,function(md){
   list(model_method = 'dtree_fit',
@@ -140,7 +163,6 @@ dboost_args = lapply(max_depth,function(md){
        weight_tol = weight_tol,
        objective_tol = objective_tol)
 })
-
 
 model_args = c(cart_args,rf_args,spot_args,spot_forest_args,
                boost_args,dboost_args)
@@ -159,8 +181,6 @@ for(tau in noise_multiplier_taus){
   #in_sample_spo_loss = out_of_sample_spo_loss = matrix(NA,n_sims,n_models,dimnames = list(NULL,model_names))
   in_sample_opt_cum_loss = out_of_sample_opt_cum_loss = matrix(NA,n_sims,n_models,dimnames = list(NULL,model_names))
 
-
-  #mean(rowSums(costs*z_hat_db)[-1]) + 0.05*mean(rowSums(abs(diff(z_hat_db))))
   # --- main loop:
   for(i in 1:n_sims){
 
@@ -193,8 +213,7 @@ for(tau in noise_multiplier_taus){
     error_oos = t(L_mat)%*%L_mat/(10*n_z)
     P_train = P_true + 0.10*error_train#max(tau,0.10)
     P_oos = P_true + 0.10*error_oos
-    #P_train = P_true + tau*diag(n_z)
-    #P_oos = P_true + tau*diag(n_z)
+
 
     # --- random equality constraint:
     con = generate_eq_constraint(n_z,n_A)

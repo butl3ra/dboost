@@ -163,14 +163,6 @@ for(tau in noise_multiplier_taus){
                               control = control)
 
     # --- generate data:
-    dat = generate_problem_data(n_x = n_x,
-                                n_z = n_z,
-                                n_obs = 2*n_obs,
-                                pct_true = pct_true,
-                                noise_multiplier_tau = noise_multiplier_tau,
-                                polys = poly_degree,
-                                intercept = intercept,
-                                intercept_mean = intercept_mean)
     dat = generate_network_data(n_x = n_x,
                                 n_z = n_z,
                                 n_obs = 2*n_obs,
