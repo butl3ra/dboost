@@ -4,19 +4,12 @@ generate_problem_data<-function(n_x = 3,
                                 n_obs = 1000,
                                 pct_true = 0.5,
                                 noise_multiplier_tau = 0,
-                                min_sd = 1,
-                                max_sd = 1,
                                 polys = c(1,3),
                                 intercept = T,
                                 intercept_mean = 10,
-                                scale_factor = 1)
+                                x_min = -1,
+                                x_max = 1)
 {
-  # --- generate std_dev:
-  std_devs = generate_sd(n_vars = n_z,
-                         min = min_sd,
-                         max = max_sd,
-                         scale_factor = scale_factor)
-
 
   # --- generate coefficients
   theta_min = -1
@@ -34,10 +27,7 @@ generate_problem_data<-function(n_x = 3,
 
 
   # --- create x:
-   x = mvrunif(n_vars = n_x,n_obs = n_obs,min = -1,max = 1)
-  #x = generate_x(n_x = n_x,
-  #               n_obs = n_obs,
-  #               V = diag(n_x))#/4 )
+   x = mvrunif(n_vars = n_x,n_obs = n_obs,min = x_min,max = x_max)
 
 
   # --- true f(x)
@@ -55,9 +45,7 @@ generate_problem_data<-function(n_x = 3,
 
   # ---- generate errors:
   errors = mvrnorm(n_obs = n_obs,mu = rep(intercept_mean,n_z),V =  diag(n_z))
-  #generate_x(n_x = n_z,
-  #                    n_obs = n_obs,
-  #                    V = diag(n_z))
+
 
   # --- generate y with error
   y = f + noise_multiplier_tau*errors
