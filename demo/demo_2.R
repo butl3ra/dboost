@@ -69,7 +69,7 @@ z_hat_mse = opt_oracle_lp(cost_hat_mse)
 total_cost_mse = sum(compute_cost(z_hat_mse,cost))
 
 
-# --- decision aware:
+# --- decision aware: SPO
 b_spo = boost_fit(x = x,
                   y = cost,
                   demean = FALSE,
@@ -81,7 +81,7 @@ b_spo = boost_fit(x = x,
                                     maximize = NULL,
                                     y_hat_fn = NULL),
                   objective_method = 'objective_qspo',
-                  grad_method = 'grad_spo',
+                  grad_method = 'grad_qspo',
                   do_grad_project = TRUE,
                   maximize = NULL,
                   verbose = TRUE,
@@ -95,16 +95,16 @@ cost_hat_spo = predict(b_spo,x=x)
 z_hat_spo = opt_oracle_lp(cost_hat_spo)
 total_cost_spo = sum(compute_cost(z_hat_spo,cost))
 
-total_cost_mse-total_cost_star
-total_cost_spo-total_cost_star
+(total_cost_mse-total_cost_star)/total_cost_star
+(total_cost_spo-total_cost_star)/total_cost_star
 
 # --- plot and prediction:
-plot(x,cost1,type='l',lwd=3,ylim = c(0,5))
-lines(x,cost2,col = 'darkred',lwd=4)
-lines(x,cost_hat_mse[,1],col='grey',lwd=3)
-lines(x,cost_hat_mse[,2],col='pink',lwd=3)
-lines(x,cost_hat_spo[,1],col='grey',lwd=5)
-lines(x,cost_hat_spo[,2],col='pink',lwd=5)
+plot(x,cost1,type='p',lwd=3,pch=16,ylim=c(0,5))
+points(x,cost2,col = 'darkred',lwd=4,pch=16)
+lines(x,cost_hat_mse[,1],col='grey',lwd=5)
+lines(x,cost_hat_mse[,2],col='pink',lwd=5)
+lines(x,cost_hat_spo[,1],col='navy',lwd=5)
+lines(x,cost_hat_spo[,2],col='coral',lwd=5)
 
 
 
