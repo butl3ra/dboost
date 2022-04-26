@@ -136,19 +136,16 @@ generate_popt_data<-function(n_x = 5,
 
 #' @export
 generate_network_data<-function(n_x = 5,
-                                n_y = 50,
+                                n_z = 50,
                                 n_obs = 100,
                                 pct_true = 0.5,
                                 poly_degree = 3,
                                 noise_multiplier_tau = 1,
                              ...)
 {
-  # --- theta and x:
-  x = generate_x(n_x = n_x,
-                 n_obs = n_obs,
-                 mu = rep(0,n_x),
-                 V = diag(n_x))
-  theta = generate_coef(n_y = n_y,
+  # --- create x:
+  x = mvrunif(n_vars = n_x,n_obs = n_obs,min = 0,max = 1)
+  theta = generate_coef(n_y = n_z,
                         n_x = n_x,
                         pct_true = pct_true,
                         method = 'runif',
@@ -156,17 +153,14 @@ generate_network_data<-function(n_x = 5,
                         max = 1)
 
   # --- generate y:
-  y = generate_y(x=x,b=theta)
-  alpha_factor = 0.05/sqrt(n_x)
-  inner_constant = 0.10^(1/poly_degree)
-  cost = (alpha_factor*y + inner_constant)^poly_degree
+  y = (1/sqrt(n_x))*generate_y(x=x,b=theta)
+  cost = (y + 1)^poly_degree
 
   # --- add sigma noise:
-  sigma_noise = 0.01*noise_multiplier_tau
-  rand_noise = sigma_noise*matrix(rnorm(n_obs*n_y),n_obs,n_y)
-  #rand_noise = sigma_noise*matrix(runif(n_obs*n_y,min = 0,max = 3),n_obs,n_y)
+  sigma_noise = noise_multiplier_tau
+  rand_noise = mvrunif(n_vars = n_z,n_obs = n_obs,min = 1-sigma_noise,max = 1 + sigma_noise)
 
-  cost = cost  + rand_noise
+  cost = cost*rand_noise
 
   # --- output:
   colnames(x) = paste0('x',1:n_x)
