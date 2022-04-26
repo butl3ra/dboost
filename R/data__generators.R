@@ -8,7 +8,8 @@ generate_problem_data<-function(n_x = 3,
                                 intercept = T,
                                 intercept_mean = 10,
                                 x_min = -1,
-                                x_max = 1)
+                                x_max = 1,
+                                mult_noise = FALSE)
 {
 
   # --- generate coefficients
@@ -43,12 +44,23 @@ generate_problem_data<-function(n_x = 3,
     theta_list = c(list(intercept_value),theta_list)
   }
 
-  # ---- generate errors:
-  errors = mvrnorm(n_obs = n_obs,mu = rep(intercept_mean,n_z),V =  diag(n_z))
+  # --- multiplicative errors
+  if(mult_noise){
+    sigma_noise = noise_multiplier_tau
+    rand_noise = mvrunif(n_vars = n_z,n_obs = n_obs,min = 1-sigma_noise,max = 1 + sigma_noise)
+
+    y = f*rand_noise
+  }
+  else{
+    # --- additive errors:
+    # ---- generate errors:
+    errors = mvrnorm(n_obs = n_obs,mu = rep(intercept_mean,n_z),V =  diag(n_z))
 
 
-  # --- generate y with error
-  y = f + noise_multiplier_tau*errors
+    # --- generate y with error
+    y = f + noise_multiplier_tau*errors
+  }
+
 
 
   # --- output:
