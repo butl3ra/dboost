@@ -6,7 +6,7 @@ dir.create(dir_out,recursive = T)
 file_names_0 = c('in_sample_cost','out_of_sample_cost','in_sample_opt_cum_cost','out_of_sample_opt_cum_cost')
 file_names_0 = paste0(dir_out,file_names_0)
 load_dboost_modules()
-noise_multiplier_taus = 0.5
+noise_multiplier_taus = c(0,0.5,1)
 
 # --- problem variables:
 n_obs = 1000
