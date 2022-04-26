@@ -62,7 +62,7 @@ model_methods = c(cart_0 = 'dtree_fit',
 max_depth = 0:2
 min_obs = 0.05
 step_size = 0.05
-n_samples = 250
+n_samples = 100
 obs_fraction = 0.5
 vars_fraction = 0.5
 verbose = TRUE
@@ -176,14 +176,7 @@ for(tau in noise_multiplier_taus){
                                 polys = poly_degree,
                                 intercept = intercept,
                                 intercept_mean = intercept_mean)
-    #dat$cost = -dat$cost
-    #dat = generate_popt_data(n_x = n_x,
-    #                         n_y = n_z,
-    #                         n_obs = 2*n_obs,
-    #                         n_factors = n_factors,
-    #                         pct_true = pct_true,
-    #                         noise_multiplier_tau = noise_multiplier_tau,
-    #                         poly_degree = poly_degree)
+
 
     # --- generate covariance:
     L_mat = matrix(runif(n_z*n_factors,-1,1),n_z,n_factors)
