@@ -6,7 +6,8 @@ dir.create(dir_out,recursive = T)
 file_names_0 = c('in_sample_cost','out_of_sample_cost','in_sample_opt_cum_cost','out_of_sample_opt_cum_cost')
 file_names_0 = paste0(dir_out,file_names_0)
 
-noise_multiplier_taus = 0.5
+load_dboost_modules()
+noise_multiplier_taus = c(0,0.5,1)
 
 
 # --- problem variables:
@@ -83,7 +84,7 @@ spot_forest_args = lapply(n_samples,function(ns){
        model_args = list(max_depth = max_depth,
                          min_obs = min_obs,
                          step_size = step_size,
-                         objective_method = 'objective_dtree_qspo'),
+                         objective_method = 'objective_dtree_spo'),
        n_samples = ns,
        obs_fraction = obs_fraction,
        vars_fraction = vars_fraction,
@@ -113,9 +114,9 @@ dboost_args = lapply(n_samples,function(ns){
        model_args = list(max_depth = max_depth,
                          min_obs = min_obs,
                          step_size = step_size,
-                         objective_method = 'objective_dtree_qspo'),
-       objective_method = 'objective_qspo',
-       grad_method = 'grad_qspo',
+                         objective_method = 'objective_dtree_spo'),
+       objective_method = 'objective_spo',
+       grad_method = 'grad_spo',
        do_grad_project = TRUE,
        maximize = NULL,
        verbose = verbose,
@@ -153,7 +154,7 @@ for(tau in noise_multiplier_taus){
     # --- generate a random network flow problem data:
     cone = generate_network_flow(n_nodes,decay = edge_decay)
     n_z = ncol(cone$A)
-    P =  4*diag(n_z)
+    P =  eps*diag(n_z)
 
     # --- create oracle:
     opt_oracle_lp = optim_scs(A = cone$A,
@@ -163,12 +164,14 @@ for(tau in noise_multiplier_taus){
                               control = control)
 
     # --- generate data:
-    dat = generate_network_data(n_x = n_x,
+    dat = generate_problem_data(n_x = n_x,
                                 n_z = n_z,
                                 n_obs = 2*n_obs,
                                 pct_true = pct_true,
                                 noise_multiplier_tau = noise_multiplier_tau,
-                                poly_degree = 7)
+                                polys = poly_degree,
+                                intercept = intercept,
+                                intercept_mean = intercept_mean)
 
     # --- cost and x
     x_train = dat$x[idx_train,,drop=F]
@@ -177,11 +180,11 @@ for(tau in noise_multiplier_taus){
     costs_oos = dat$cost[idx_oos,,drop = F]
 
     # --- optimal decision:
-    z_star_train = opt_oracle_lp(costs_train)
-    z_star_oos = opt_oracle_lp(costs_oos)
+    z_star_train = opt_oracle_lp(costs_train, P = diag(n_z)*0)
+    z_star_oos = opt_oracle_lp(costs_oos, P = diag(n_z)*0)
 
-    cost_star_train = compute_qcost(z_star_train,costs_train,P=P)
-    cost_star_oos = compute_qcost(z_star_oos,costs_oos,P=P)
+    cost_star_train = compute_cost(z_star_train,costs_train)
+    cost_star_oos = compute_cost(z_star_oos,costs_oos)
 
     in_sample_opt_cum_loss[i,] = sum(cost_star_train)
     out_of_sample_opt_cum_loss[i,] = sum(cost_star_oos)
@@ -212,13 +215,11 @@ for(tau in noise_multiplier_taus){
       z_hat_oos = opt_oracle_lp(costs_hat_oos)
 
       # --- optimal predictions
-      cost_hat_train = compute_qcost(z_hat_train,costs_train,P=P)
-      cost_hat_oos = compute_qcost(z_hat_oos,costs_oos,P=P)
+      cost_hat_train = compute_cost(z_hat_train,costs_train)
+      cost_hat_oos = compute_cost(z_hat_oos,costs_oos)
 
       in_sample_cost[i,nm] = sum(cost_hat_train)
       out_of_sample_cost[i,nm] = sum(cost_hat_oos)
-      cat(sum(cost_hat_train),'\n')
-      cat(sum(cost_hat_oos),'\n')
 
 
 
