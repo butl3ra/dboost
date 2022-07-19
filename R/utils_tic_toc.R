@@ -1,7 +1,7 @@
 #' @export
 tic<-function(...)
 {
-  assign("elapsedTime", proc.time()[3], envir = .sporEnv)
+  assign("elapsedTime", proc.time()[3], envir =  .dboostEnv)
   invisible()
 }
 
@@ -9,7 +9,7 @@ tic<-function(...)
 toc<-function (echo = TRUE,
                ...)
 {
-  prevTime <- get("elapsedTime", envir = .sporEnv)
+  prevTime <- get("elapsedTime", envir =  .dboostEnv)
   diffTimeSecs <- proc.time()[3] - prevTime
   if (echo) {
     cat(sprintf("elapsed time is %f seconds", diffTimeSecs),"\n")
