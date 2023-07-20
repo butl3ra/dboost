@@ -1,4 +1,4 @@
-# dboost :decision boosting for convex cone predict then optimize problems
+# dboost: decision boosting for convex cone predict then optimize problems
 
 The dboost repo has moved to the IPO Lab.
 
